@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maineiac Mysticbot — Tarot, Psychic, Moon & Birth Chart readings, transmitted from the granite coast of Maine via Telegram.">
+  <title>Maineiac Mysticbot · An Almanac of Small Fates</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=EB+Garamond:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:    '#0a0e14',
+            shadow: '#131922',
+            fog:    '#1c2530',
+            pewter: '#4a5660',
+            bone:   '#e8dcc4',
+            brass:  '#c9a961',
+            ember:  '#d97757',
+            moss:   '#7a9483',
+            rose:   '#a8736e',
+          },
+          fontFamily: {
+            display: ['"Cormorant Garamond"', 'serif'],
+            body:    ['"EB Garamond"', 'serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --ink:    #0a0e14;
+      --shadow: #131922;
+      --fog:    #1c2530;
+      --pewter: #4a5660;
+      --bone:   #e8dcc4;
+      --brass:  #c9a961;
+      --ember:  #d97757;
+      --moss:   #7a9483;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--ink);
+      color: var(--bone);
+      font-family: 'EB Garamond', serif;
+      font-feature-settings: "liga", "dlig", "kern";
+    }
+
+    /* Film-grain overlay — gives the whole page that printed-almanac feel */
+    .grain::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 100;
+      opacity: 0.06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    }
+
+    /* Drifting fog layer */
+    .fog-layer {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(122,148,131,0.18), transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 20% 90%, rgba(201,169,97,0.10), transparent 60%);
+      animation: drift 24s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes drift {
+      0%   { transform: translateX(-2%) translateY(0); }
+      100% { transform: translateX(2%) translateY(-1%); }
+    }
+
+    /* Star field */
+    .star {
+      position: absolute; width: 2px; height: 2px;
+      background: var(--bone); border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.15; transform: scale(0.6); }
+      50%      { opacity: 0.9; transform: scale(1.1); }
+    }
+
+    /* Hand-tuned typographic details */
+    .display { font-family: 'Cormorant Garamond', serif; font-feature-settings: "liga", "dlig"; }
+    .smallcaps { letter-spacing: 0.28em; text-transform: uppercase; font-weight: 500; }
+    .hairline { border-top: 1px solid; border-color: var(--pewter); }
+
+    /* Decorative double-rule (engraver's line) */
+    .double-rule {
+      height: 1px; background: var(--brass);
+      box-shadow: 0 3px 0 0 var(--brass);
+      opacity: 0.5;
+    }
+
+    /* Service card — restrained hover, no bouncy nonsense */
+    .codex-card {
+      position: relative;
+      background: linear-gradient(180deg, var(--shadow) 0%, var(--fog) 100%);
+      border: 1px solid rgba(201,169,97,0.18);
+      transition: border-color 400ms ease, transform 400ms ease, box-shadow 400ms ease;
+    }
+    .codex-card::before {
+      content: ""; position: absolute; inset: 6px;
+      border: 1px solid rgba(232,220,196,0.06);
+      pointer-events: none;
+    }
+    .codex-card:hover {
+      border-color: var(--brass);
+      transform: translateY(-3px);
+      box-shadow: 0 18px 48px -24px rgba(201,169,97,0.45);
+    }
+    .codex-card:hover .sigil { stroke: var(--ember); }
+
+    /* Sigils */
+    .sigil { stroke: var(--brass); stroke-width: 1.25; fill: none;
+             stroke-linecap: round; stroke-linejoin: round;
+             transition: stroke 400ms ease; }
+
+    /* Reveal-on-load stagger */
+    .reveal { opacity: 0; transform: translateY(12px);
+              animation: rise 900ms cubic-bezier(.2,.7,.2,1) forwards; }
+    .reveal[data-d="1"] { animation-delay: 100ms; }
+    .reveal[data-d="2"] { animation-delay: 250ms; }
+    .reveal[data-d="3"] { animation-delay: 420ms; }
+    .reveal[data-d="4"] { animation-delay: 600ms; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+    /* Wave divider */
+    .wave-rule {
+      height: 18px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 18' width='120' height='18'><path d='M0 9 Q 15 0 30 9 T 60 9 T 90 9 T 120 9' stroke='%23c9a961' stroke-width='1' fill='none' opacity='0.6'/></svg>");
+      background-repeat: repeat-x;
+      background-position: center;
+      opacity: 0.7;
+    }
+
+    /* Moon glow */
+    .moon-glow {
+      filter: drop-shadow(0 0 20px rgba(232,220,196,0.35))
+              drop-shadow(0 0 50px rgba(201,169,97,0.25));
+    }
+
+    /* Anchor underlines that aren't hideous */
+    .ink-link { background-image: linear-gradient(var(--brass), var(--brass));
+                background-size: 100% 1px;
+                background-repeat: no-repeat;
+                background-position: 0 100%;
+                padding-bottom: 2px;
+                transition: color 200ms ease;
+    }
+    .ink-link:hover { color: var(--ember); }
+  </style>
+</head>
+
+<body class="grain antialiased">
+
+  <!-- =================== TOP NAV / MASTHEAD STRIP =================== -->
+  <nav class="border-b border-pewter/40 bg-ink/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
+
+      <!-- Brand -->
+      <a href="#" class="flex items-center gap-3 group">
+        <!-- Tiny waxing-moon mark -->
+        <svg width="28" height="28" viewBox="0 0 32 32" class="shrink-0">
+          <circle cx="16" cy="16" r="13" fill="none" stroke="#c9a961" stroke-width="1"/>
+          <path d="M22 6 a13 13 0 1 0 0 20 a10 10 0 1 1 0 -20" fill="#c9a961"/>
+        </svg>
+        <div class="flex flex-col leading-none">
+          <span class="display text-xl tracking-wide text-bone">Maineiac Mysticbot</span>
+          <span class="font-mono text-[10px] text-pewter tracking-widest mt-0.5">EST. 2026 · BANGOR, ME</span>
+        </div>
+      </a>
+
+      <!-- Almanac strip (desktop only) -->
+      <div class="hidden md:flex items-center gap-8 font-mono text-[11px] text-pewter tracking-wider">
+        <span><span class="text-brass">44.80°</span> N</span>
+        <span><span class="text-brass">68.77°</span> W</span>
+        <span id="moon-strip" class="text-bone/70">— · —</span>
+      </div>
+
+      <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+         class="smallcaps text-[11px] border border-brass/60 text-bone hover:bg-brass hover:text-ink px-4 py-2.5 rounded-none transition-colors">
+        Open in Telegram →
+      </a>
+    </div>
+  </nav>
+
+  <!-- =================== HERO =================== -->
+  <header class="relative overflow-hidden">
+    <!-- Star field -->
+    <div id="stars" aria-hidden="true" class="absolute inset-0 pointer-events-none"></div>
+    <div class="fog-layer"></div>
+
+    <!-- Big background photo (kept from your file) softly layered -->
+    <div class="absolute inset-0 opacity-25 pointer-events-none"
+         style="background-image: linear-gradient(180deg, rgba(10,14,20,0.4) 0%, rgba(10,14,20,1) 100%), url('hero.jpg'); background-size: cover; background-position: center 35%;"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-10 pt-20 pb-28 lg:pt-32 lg:pb-40">
+
+      <!-- Tiny eyebrow -->
+      <div class="reveal smallcaps text-[10px] text-brass mb-10" data-d="1">
+        ◇  Vol. I  ·  An Almanac of Small Fates  ·  Issue No. 47  ◇
+      </div>
+
+      <!-- Asymmetric two-column: copy left, big moon right -->
+      <div class="grid lg:grid-cols-12 gap-10 items-center">
+
+        <!-- Copy -->
+        <div class="lg:col-span-7">
+          <h1 class="reveal display text-6xl md:text-7xl lg:text-[112px] leading-[0.95] text-bone font-medium tracking-[-0.01em]" data-d="2">
+            Readings,<br>
+            drawn from<br>
+            <em class="text-brass not-italic">the tides.</em>
+          </h1>
+
+          <p class="reveal mt-10 max-w-md text-xl md:text-[22px] leading-snug text-bone/80 font-body" data-d="3">
+            Tarot, psychic, birth chart, numerology, dream and moon-phase readings — transmitted from the rocky coast of Maine, delivered to your phone in seconds.
+          </p>
+
+          <div class="reveal mt-12 flex flex-col sm:flex-row gap-4 items-start" data-d="4">
+            <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-3 bg-brass hover:bg-bone text-ink px-8 py-4 smallcaps text-[12px] transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.49 8.83 19.4c.45 0 .65-.2.88-.43l2.12-2.03 4.4 3.22c.8.45 1.38.21 1.6-.74l2.9-13.6c.27-1.2-.43-1.66-1.21-1.37L1.7 9.4C.51 9.86.53 10.5 1.5 10.81l4.4 1.37 10.21-6.43c.48-.31.92-.14.56.21z"/></svg>
+              Begin a Reading
+            </a>
+            <a href="#codex"
+               class="inline-flex items-center gap-2 text-bone/80 hover:text-brass smallcaps text-[12px] py-4 transition-colors">
+              View the Codex ↓
+            </a>
+          </div>
+        </div>
+
+        <!-- Moon -->
+        <div class="lg:col-span-5 flex justify-center lg:justify-end relative">
+          <div class="relative">
+            <!-- Decorative outer ring with tick marks -->
+            <svg width="380" height="380" viewBox="0 0 380 380" class="moon-glow">
+              <!-- Outer engraver's ring -->
+              <circle cx="190" cy="190" r="178" fill="none" stroke="#c9a961" stroke-width="0.5" opacity="0.3"/>
+              <circle cx="190" cy="190" r="170" fill="none" stroke="#c9a961" stroke-width="0.5" opacity="0.4"/>
+              <!-- Tick marks every 30deg -->
+              <g stroke="#c9a961" stroke-width="0.5" opacity="0.5">
+                <line x1="190" y1="12"  x2="190" y2="20"/>
+                <line x1="190" y1="368" x2="190" y2="360"/>
+                <line x1="12"  y1="190" x2="20"  y2="190"/>
+                <line x1="368" y1="190" x2="360" y2="190"/>
+                <line x1="65"  y1="65"  x2="71"  y2="71"/>
+                <line x1="315" y1="315" x2="309" y2="309"/>
+                <line x1="65"  y1="315" x2="71"  y2="309"/>
+                <line x1="315" y1="65"  x2="309" y2="71"/>
+              </g>
+              <!-- Moon body -->
+              <defs>
+                <radialGradient id="moonGrad" cx="40%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="#f4ecd6"/>
+                  <stop offset="100%" stop-color="#c9a961"/>
+                </radialGradient>
+                <mask id="phaseMask" maskUnits="userSpaceOnUse">
+                  <rect width="380" height="380" fill="white"/>
+                  <ellipse id="phase-shadow" cx="190" cy="190" rx="80" ry="125" fill="black"/>
+                </mask>
+              </defs>
+              <circle cx="190" cy="190" r="125" fill="url(#moonGrad)" mask="url(#phaseMask)" opacity="0.95"/>
+              <!-- Crater suggestions -->
+              <g fill="#a08550" opacity="0.25">
+                <circle cx="160" cy="170" r="8"/>
+                <circle cx="215" cy="200" r="5"/>
+                <circle cx="180" cy="220" r="6"/>
+                <circle cx="200" cy="155" r="4"/>
+              </g>
+              <!-- Outer faint halo -->
+              <circle cx="190" cy="190" r="138" fill="none" stroke="#e8dcc4" stroke-width="0.5" opacity="0.15" stroke-dasharray="2 6"/>
+            </svg>
+            <!-- Phase label -->
+            <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 text-center">
+              <div class="font-mono text-[10px] text-pewter tracking-widest mb-1">CURRENT PHASE</div>
+              <div id="moon-phase-label" class="display text-2xl text-brass italic">—</div>
+              <div id="moon-phase-illumination" class="font-mono text-[10px] text-bone/60 mt-1">—%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Almanac strip at bottom of hero -->
+    <div class="hairline border-pewter/40">
+      <div class="max-w-6xl mx-auto px-6 lg:px-10 py-5 grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8 font-mono text-[11px] text-bone/60 tracking-wider">
+        <div><span class="text-pewter block text-[9px]">DATE</span><span id="today-date">—</span></div>
+        <div><span class="text-pewter block text-[9px]">DAY OF YEAR</span><span id="day-of-year">—</span></div>
+        <div><span class="text-pewter block text-[9px]">MOON</span><span id="moon-short">—</span></div>
+        <div><span class="text-pewter block text-[9px]">TRANSMISSION</span>TELEGRAM · INSTANT</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =================== THE CODEX (services) =================== -->
+  <section id="codex" class="relative py-28 lg:py-36 bg-ink">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10">
+
+      <!-- Section header -->
+      <div class="text-center mb-20">
+        <div class="smallcaps text-[10px] text-brass mb-4">§ II</div>
+        <h2 class="display text-5xl md:text-6xl text-bone">The Codex</h2>
+        <div class="wave-rule mx-auto mt-6 max-w-[180px]"></div>
+        <p class="mt-6 font-body italic text-bone/70 text-lg">Six readings. Each cast at the moment you ask.</p>
+      </div>
+
+      <!-- Cards grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-pewter/30">
+
+        <!-- I. TAROT -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">I.</span>
+            <span class="font-mono text-brass text-lg">$2.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <rect x="14" y="6" width="28" height="44" rx="2"/>
+            <rect x="18" y="10" width="20" height="36" rx="1" opacity="0.5"/>
+            <circle cx="28" cy="22" r="3"/>
+            <path d="M22 32 L28 28 L34 32 L34 40 L22 40 Z"/>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Tarot Reading</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">A three-card draw on whatever you bring to the table — past, present, the path forward.</p>
+        </div>
+
+        <!-- II. PSYCHIC -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">II.</span>
+            <span class="font-mono text-brass text-lg">$3.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <path d="M6 28 Q 28 8 50 28 Q 28 48 6 28 Z"/>
+            <circle cx="28" cy="28" r="9"/>
+            <circle cx="28" cy="28" r="3" fill="#c9a961"/>
+            <path d="M28 4 L28 10 M28 46 L28 52 M4 28 L10 28 M46 28 L52 28" opacity="0.6"/>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Psychic Reading</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">Open-channel guidance on a question you carry. Receive what comes through.</p>
+        </div>
+
+        <!-- III. BIRTH CHART -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">III.</span>
+            <span class="font-mono text-brass text-lg">$4.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="22"/>
+            <circle cx="28" cy="28" r="14" opacity="0.6"/>
+            <circle cx="28" cy="28" r="2" fill="#c9a961"/>
+            <line x1="6"  y1="28" x2="50" y2="28" opacity="0.5"/>
+            <line x1="28" y1="6"  x2="28" y2="50" opacity="0.5"/>
+            <line x1="12.5" y1="12.5" x2="43.5" y2="43.5" opacity="0.3"/>
+            <line x1="43.5" y1="12.5" x2="12.5" y2="43.5" opacity="0.3"/>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Birth Chart Reading</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">A natal map drawn from your date, time, and place — sun, moon, rising, the works.</p>
+        </div>
+
+        <!-- IV. NUMEROLOGY -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">IV.</span>
+            <span class="font-mono text-brass text-lg">$2.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <rect x="8"  y="8"  width="40" height="40"/>
+            <line x1="8"  y1="22" x2="48" y2="22"/>
+            <line x1="8"  y1="36" x2="48" y2="36"/>
+            <line x1="22" y1="8"  x2="22" y2="48"/>
+            <line x1="36" y1="8"  x2="36" y2="48"/>
+            <text x="15" y="19" font-family="JetBrains Mono" font-size="6" fill="#c9a961">2</text>
+            <text x="29" y="19" font-family="JetBrains Mono" font-size="6" fill="#c9a961">7</text>
+            <text x="43" y="19" font-family="JetBrains Mono" font-size="6" fill="#c9a961">6</text>
+            <text x="15" y="33" font-family="JetBrains Mono" font-size="6" fill="#c9a961">9</text>
+            <text x="29" y="33" font-family="JetBrains Mono" font-size="6" fill="#c9a961">5</text>
+            <text x="43" y="33" font-family="JetBrains Mono" font-size="6" fill="#c9a961">1</text>
+            <text x="15" y="47" font-family="JetBrains Mono" font-size="6" fill="#c9a961">4</text>
+            <text x="29" y="47" font-family="JetBrains Mono" font-size="6" fill="#c9a961">3</text>
+            <text x="43" y="47" font-family="JetBrains Mono" font-size="6" fill="#c9a961">8</text>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Numerology Reading</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">Your name and birth date reduced to the numbers that quietly run your life.</p>
+        </div>
+
+        <!-- V. DREAM -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">V.</span>
+            <span class="font-mono text-brass text-lg">$2.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <path d="M44 16 a16 16 0 1 0 0 24 a12 12 0 1 1 0 -24 z"/>
+            <path d="M14 38 Q 18 32 22 38 Q 26 32 30 38" opacity="0.7"/>
+            <circle cx="38" cy="22" r="1" fill="#c9a961"/>
+            <circle cx="46" cy="30" r="1" fill="#c9a961"/>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Dream Interpretation</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">Tell the bot what you saw last night. Get back what your sleeping mind was after.</p>
+        </div>
+
+        <!-- VI. MOON PHASE -->
+        <div class="codex-card p-10">
+          <div class="flex items-start justify-between mb-8">
+            <span class="font-mono text-[10px] text-pewter tracking-widest">VI.</span>
+            <span class="font-mono text-brass text-lg">$2.99</span>
+          </div>
+          <svg class="sigil mb-6" width="56" height="56" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="14"/>
+            <path d="M28 14 a14 14 0 0 1 0 28 a10 10 0 0 0 0 -28 z" fill="#c9a961" opacity="0.7"/>
+            <circle cx="10" cy="28" r="2" fill="#c9a961"/>
+            <circle cx="46" cy="28" r="2" fill="#c9a961"/>
+            <circle cx="28" cy="10" r="2" fill="#c9a961"/>
+            <circle cx="28" cy="46" r="2" fill="#c9a961"/>
+          </svg>
+          <h3 class="display text-2xl text-bone mb-2">Moon Phase Reading</h3>
+          <p class="font-body text-bone/65 text-base leading-snug">Where the moon is tonight — and what to plant, release, or rest with under it.</p>
+        </div>
+
+      </div>
+
+      <p class="text-center mt-12 font-mono text-[11px] text-pewter tracking-wider">
+        ALL READINGS DELIVERED IN-CHAT · TYPICALLY UNDER 60 SECONDS
+      </p>
+    </div>
+  </section>
+
+  <!-- =================== HOW THE WIRE WORKS =================== -->
+  <section class="relative py-28 lg:py-32" style="background: linear-gradient(180deg, var(--ink) 0%, var(--shadow) 100%);">
+    <div class="max-w-5xl mx-auto px-6 lg:px-10">
+      <div class="text-center mb-20">
+        <div class="smallcaps text-[10px] text-brass mb-4">§ III</div>
+        <h2 class="display text-5xl md:text-6xl text-bone">How the Wire Works</h2>
+        <div class="wave-rule mx-auto mt-6 max-w-[180px]"></div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-10 lg:gap-16">
+        <div class="text-center">
+          <div class="display text-7xl text-brass/30 mb-3 leading-none">i.</div>
+          <h3 class="display text-2xl text-bone mb-3">Open the Chat</h3>
+          <p class="text-bone/65 leading-snug">Tap into Telegram. The bot is already awake — it never sleeps, it just watches the tides.</p>
+        </div>
+        <div class="text-center">
+          <div class="display text-7xl text-brass/30 mb-3 leading-none">ii.</div>
+          <h3 class="display text-2xl text-bone mb-3">Choose & Pay</h3>
+          <p class="text-bone/65 leading-snug">Pick a reading, settle the offering through Stripe inside the chat. No accounts, no fuss.</p>
+        </div>
+        <div class="text-center">
+          <div class="display text-7xl text-brass/30 mb-3 leading-none">iii.</div>
+          <h3 class="display text-2xl text-bone mb-3">Receive</h3>
+          <p class="text-bone/65 leading-snug">A reading written for you arrives in seconds. Yours to keep, screenshot, or sleep on.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== TELEGRAM + QR =================== -->
+  <section class="relative py-28 lg:py-36 bg-shadow">
+    <div class="absolute inset-0 fog-layer"></div>
+    <div class="relative max-w-5xl mx-auto px-6 lg:px-10">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- QR card styled like a trade card -->
+        <div class="flex justify-center lg:justify-start">
+          <div class="bg-bone p-6 pb-4 relative" style="box-shadow: 0 30px 60px -30px rgba(201,169,97,0.5), 0 4px 0 0 #1c2530;">
+            <!-- Engraver's frame inside -->
+            <div class="border border-ink/20 p-3">
+              <div class="border border-ink/10 p-1">
+                <img src="qrcode.png" alt="Scan to open Maineiac Mysticbot in Telegram" class="w-64 h-64 block">
+              </div>
+            </div>
+            <p class="text-center mt-3 font-mono text-[10px] text-ink tracking-widest">@MAINEIACMYSTICBOT</p>
+            <p class="text-center font-body italic text-ink/60 text-sm">— scan ye phone —</p>
+          </div>
+        </div>
+
+        <!-- Right copy -->
+        <div>
+          <div class="smallcaps text-[10px] text-brass mb-4">§ IV</div>
+          <h2 class="display text-5xl md:text-6xl text-bone leading-[1] mb-6">
+            Open the chat.<br>
+            <em class="text-brass not-italic">Begin the read.</em>
+          </h2>
+          <p class="font-body text-bone/75 text-lg leading-snug max-w-md mb-10">
+            No app to download, no account to make. The bot lives inside Telegram. Tap the link, send your question, and the cards do the rest.
+          </p>
+
+          <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-3 bg-brass hover:bg-bone text-ink px-8 py-4 smallcaps text-[12px] transition-colors mb-4">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.49 8.83 19.4c.45 0 .65-.2.88-.43l2.12-2.03 4.4 3.22c.8.45 1.38.21 1.6-.74l2.9-13.6c.27-1.2-.43-1.66-1.21-1.37L1.7 9.4C.51 9.86.53 10.5 1.5 10.81l4.4 1.37 10.21-6.43c.48-.31.92-.14.56.21z"/></svg>
+            t.me/MAINEIACMYSTICBOT
+          </a>
+
+          <div class="font-mono text-[11px] text-pewter tracking-wider mt-6 space-y-1">
+            <div>↳ VIP &amp; complimentary readings inside</div>
+            <div>↳ Payments handled by Stripe</div>
+            <div>↳ Transmits from 44.80°N · 68.77°W</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== FINAL CTA =================== -->
+  <section class="relative py-32 lg:py-44 bg-ink overflow-hidden">
+    <!-- Star field again, sparser -->
+    <div id="stars-2" aria-hidden="true" class="absolute inset-0 pointer-events-none"></div>
+
+    <div class="relative max-w-3xl mx-auto px-6 text-center">
+      <div class="double-rule w-20 mx-auto mb-10"></div>
+      <h2 class="display text-5xl md:text-7xl text-bone leading-[1.05]">
+        The tide is turning.<br>
+        <em class="text-brass not-italic">The moon is up.</em>
+      </h2>
+      <p class="mt-8 font-body italic text-bone/70 text-xl">Begin a reading.</p>
+
+      <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-3 mt-12 bg-brass hover:bg-bone text-ink px-10 py-5 smallcaps text-[12px] transition-colors">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.49 8.83 19.4c.45 0 .65-.2.88-.43l2.12-2.03 4.4 3.22c.8.45 1.38.21 1.6-.74l2.9-13.6c.27-1.2-.43-1.66-1.21-1.37L1.7 9.4C.51 9.86.53 10.5 1.5 10.81l4.4 1.37 10.21-6.43c.48-.31.92-.14.56.21z"/></svg>
+        Chat with Mysticbot
+      </a>
+
+      <div class="double-rule w-20 mx-auto mt-14"></div>
+    </div>
+  </section>
+
+  <!-- =================== FOOTER / COLOPHON =================== -->
+  <footer class="bg-ink border-t border-pewter/30 py-14">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-8 text-center md:text-left">
+      <div>
+        <div class="display text-xl text-bone mb-2">Maineiac Mysticbot</div>
+        <p class="font-body italic text-bone/60 text-sm">An almanac of small fates,<br>transmitted from the granite coast.</p>
+      </div>
+      <div class="font-mono text-[11px] text-pewter tracking-wider space-y-1.5">
+        <div class="text-bone/70 mb-2">COORDINATES</div>
+        <div>44.8016° N, 68.7712° W</div>
+        <div>Bangor, Maine, U.S.A.</div>
+      </div>
+      <div class="font-mono text-[11px] text-pewter tracking-wider space-y-1.5">
+        <div class="text-bone/70 mb-2">COLOPHON</div>
+        <div>© 2026 Maineiac Mysticbot</div>
+        <div>Set in Cormorant Garamond &amp; JetBrains Mono.</div>
+        <div>Built by hand, fed by tides.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =================== SCRIPTS =================== -->
+  <script>
+    /* ---------- Star field ---------- */
+    function seedStars(containerId, count = 60) {
+      const c = document.getElementById(containerId);
+      if (!c) return;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('span');
+        s.className = 'star';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top  = Math.random() * 100 + '%';
+        s.style.setProperty('--dur',   (2 + Math.random() * 4).toFixed(2) + 's');
+        s.style.setProperty('--delay', (Math.random() * 4).toFixed(2) + 's');
+        if (Math.random() > 0.85) s.style.transform = 'scale(1.6)';
+        frag.appendChild(s);
+      }
+      c.appendChild(frag);
+    }
+    seedStars('stars', 80);
+    seedStars('stars-2', 40);
+
+    /* ---------- Moon phase ---------- */
+    function moonPhase(date = new Date()) {
+      // Reference new moon: 2000-01-06 18:14 UTC
+      const ref = new Date(Date.UTC(2000, 0, 6, 18, 14));
+      const synodic = 29.530588853;
+      const days = (date - ref) / 86400000;
+      let phase = (days % synodic) / synodic;
+      if (phase < 0) phase += 1;
+      return phase; // 0..1
+    }
+    function phaseName(p) {
+      if (p < 0.0625) return ['New Moon',         'New'];
+      if (p < 0.1875) return ['Waxing Crescent',  'Wax. Cres.'];
+      if (p < 0.3125) return ['First Quarter',    '1st Qtr'];
+      if (p < 0.4375) return ['Waxing Gibbous',   'Wax. Gibb.'];
+      if (p < 0.5625) return ['Full Moon',        'Full'];
+      if (p < 0.6875) return ['Waning Gibbous',   'Wan. Gibb.'];
+      if (p < 0.8125) return ['Last Quarter',     'Last Qtr'];
+      if (p < 0.9375) return ['Waning Crescent',  'Wan. Cres.'];
+      return                 ['New Moon',         'New'];
+    }
+    function illumination(p) {
+      // Illuminated fraction approximation
+      return Math.round((1 - Math.cos(2 * Math.PI * p)) / 2 * 100);
+    }
+
+    const now = new Date();
+    const p = moonPhase(now);
+    const [longName, shortName] = phaseName(p);
+    const illum = illumination(p);
+
+    document.getElementById('moon-phase-label').textContent = longName;
+    document.getElementById('moon-phase-illumination').textContent = illum + '% illuminated';
+    document.getElementById('moon-strip').textContent = shortName.toUpperCase() + ' · ' + illum + '%';
+    document.getElementById('moon-short').textContent  = longName + ' (' + illum + '%)';
+
+    /* ---------- Date strip ---------- */
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('today-date').textContent =
+      months[now.getMonth()].toUpperCase() + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const dayOfYear = Math.floor(diff / 86400000);
+    document.getElementById('day-of-year').textContent =
+      String(dayOfYear).padStart(3, '0') + ' / 365';
+
+    /* ---------- Animate the SVG phase shadow on the hero moon ----------
+       Mask ellipse: rx=80 means a half-disc shadow.
+       For new (p=0): shadow centered, rx=125 -> covers all
+       For full (p=0.5): shadow off-screen
+       We translate the ellipse left/right based on phase.            */
+    const phaseShadow = document.getElementById('phase-shadow');
+    if (phaseShadow) {
+      // Map phase (0..1) to shadow x-offset and rx.
+      // 0 new -> rx=125, cx=190 (full shadow)
+      // 0.25 first quarter -> shadow on left half (cx=190-125, rx=125)
+      // 0.5 full -> shadow off (cx=-200)
+      // 0.75 last quarter -> shadow on right half (cx=190+125)
+      let cx, rx = 130;
+      if (p < 0.5) {
+        // waxing: shadow recedes to the left
+        cx = 190 - (p * 2) * 380;
+      } else {
+        // waning: shadow advances from the right
+        cx = 190 + ((p - 0.5) * 2) * 380;
+      }
+      // Snap to "fullness" by stretching rx for crescent/gibbous
+      const dist = Math.abs(p - 0.5);
+      rx = 130 + dist * 80;
+      phaseShadow.setAttribute('cx', cx.toFixed(1));
+      phaseShadow.setAttribute('rx', rx.toFixed(1));
+    }
+  </script>
+</body>
+</html>
