@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="About Maineiac Mysticbot — how it works, who built it, and answers to common questions.">
+  <title>About · Maineiac Mysticbot</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=EB+Garamond:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink:    '#0a0e14',
+            shadow: '#131922',
+            fog:    '#1c2530',
+            pewter: '#4a5660',
+            bone:   '#e8dcc4',
+            brass:  '#c9a961',
+            ember:  '#d97757',
+            moss:   '#7a9483',
+            rose:   '#a8736e',
+          },
+          fontFamily: {
+            display: ['"Cormorant Garamond"', 'serif'],
+            body:    ['"EB Garamond"', 'serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --ink:    #0a0e14;
+      --shadow: #131922;
+      --fog:    #1c2530;
+      --pewter: #4a5660;
+      --bone:   #e8dcc4;
+      --brass:  #c9a961;
+      --ember:  #d97757;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--ink);
+      color: var(--bone);
+      font-family: 'EB Garamond', serif;
+      font-feature-settings: "liga", "dlig", "kern";
+    }
+
+    .grain::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 100;
+      opacity: 0.06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
+    }
+
+    .display { font-family: 'Cormorant Garamond', serif; font-feature-settings: "liga", "dlig"; }
+    .smallcaps { letter-spacing: 0.28em; text-transform: uppercase; font-weight: 500; }
+    .hairline { border-top: 1px solid; border-color: var(--pewter); }
+
+    .double-rule {
+      height: 1px; background: var(--brass);
+      box-shadow: 0 3px 0 0 var(--brass);
+      opacity: 0.5;
+    }
+
+    .wave-rule {
+      height: 18px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 18' width='120' height='18'><path d='M0 9 Q 15 0 30 9 T 60 9 T 90 9 T 120 9' stroke='%23c9a961' stroke-width='1' fill='none' opacity='0.6'/></svg>");
+      background-repeat: repeat-x;
+      background-position: center;
+      opacity: 0.7;
+    }
+
+    .ink-link {
+      background-image: linear-gradient(var(--brass), var(--brass));
+      background-size: 100% 1px;
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      padding-bottom: 2px;
+      transition: color 200ms ease;
+    }
+    .ink-link:hover { color: var(--ember); }
+
+    /* FAQ accordion */
+    details summary { cursor: pointer; list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .faq-arrow { transform: rotate(90deg); }
+    .faq-arrow { transition: transform 250ms ease; display: inline-block; }
+
+    .reveal { opacity: 0; transform: translateY(12px);
+              animation: rise 900ms cubic-bezier(.2,.7,.2,1) forwards; }
+    .reveal[data-d="1"] { animation-delay: 100ms; }
+    .reveal[data-d="2"] { animation-delay: 250ms; }
+    .reveal[data-d="3"] { animation-delay: 420ms; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+
+<body class="grain antialiased">
+
+  <!-- =================== NAV =================== -->
+  <nav class="border-b border-pewter/40 bg-ink/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
+
+      <a href="index.html" class="flex items-center gap-3 group">
+        <svg width="28" height="28" viewBox="0 0 32 32" class="shrink-0">
+          <circle cx="16" cy="16" r="13" fill="none" stroke="#c9a961" stroke-width="1"/>
+          <path d="M22 6 a13 13 0 1 0 0 20 a10 10 0 1 1 0 -20" fill="#c9a961"/>
+        </svg>
+        <div class="flex flex-col leading-none">
+          <span class="display text-xl tracking-wide text-bone">Maineiac Mysticbot</span>
+          <span class="font-mono text-[10px] text-pewter tracking-widest mt-0.5">EST. 2026 · BANGOR, ME</span>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8 font-mono text-[11px] text-pewter tracking-wider">
+        <a href="index.html#codex" class="hover:text-bone transition-colors">Codex</a>
+        <a href="index.html#how" class="hover:text-bone transition-colors">How it Works</a>
+        <span class="text-brass">About</span>
+      </div>
+
+      <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+         class="smallcaps text-[11px] border border-brass/60 text-bone hover:bg-brass hover:text-ink px-4 py-2.5 rounded-none transition-colors">
+        Open in Telegram →
+      </a>
+    </div>
+  </nav>
+
+  <!-- =================== PAGE HEADER =================== -->
+  <header class="relative py-24 lg:py-32 bg-ink overflow-hidden">
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-10 text-center">
+      <div class="reveal smallcaps text-[10px] text-brass mb-6" data-d="1">§ About</div>
+      <h1 class="reveal display text-6xl md:text-7xl text-bone font-medium leading-[1]" data-d="2">
+        The hand<br>behind the wire.
+      </h1>
+      <div class="wave-rule mx-auto mt-8 max-w-[180px]"></div>
+      <p class="reveal mt-8 font-body italic text-bone/70 text-xl max-w-xl mx-auto" data-d="3">
+        What it is, how it works, and who built it.
+      </p>
+    </div>
+  </header>
+
+  <!-- =================== HOW IT WORKS / PRIVACY =================== -->
+  <section class="py-24 lg:py-32" style="background: linear-gradient(180deg, var(--ink) 0%, var(--shadow) 100%);">
+    <div class="max-w-4xl mx-auto px-6 lg:px-10">
+
+      <div class="mb-12">
+        <div class="smallcaps text-[10px] text-brass mb-4">§ I — How It Works</div>
+        <h2 class="display text-4xl md:text-5xl text-bone mb-8">Readings, generated locally.</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-12 font-body text-bone/80 text-lg leading-relaxed">
+        <div>
+          <p class="mb-6">
+            Maineiac Mysticbot runs inside Telegram — no app to download, no account to create beyond what you already have. You pick a reading, pay through Stripe, and within seconds a full reading arrives in your chat.
+          </p>
+          <p>
+            The bot is powered by a large-language model running <em>locally on a machine in Bangor, Maine</em> — not sent to a cloud server. Your question, your name, your birth details: they travel to Maine and nowhere else.
+          </p>
+        </div>
+        <div>
+          <p class="mb-6">
+            Every reading is generated fresh at the moment you ask. No pre-written templates, no copy-paste. The model is tuned to the Maineiac Mystic persona — thirty years by the water, reading the tides, reading people.
+          </p>
+          <p>
+            Readings are not stored after delivery. They live in your Telegram chat, and that's it.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-16 border border-brass/20 p-8" style="background: linear-gradient(180deg, var(--fog) 0%, var(--shadow) 100%);">
+        <div class="grid sm:grid-cols-3 gap-8 font-mono text-[11px] text-pewter tracking-wider text-center">
+          <div>
+            <div class="text-brass text-2xl mb-2">🔒</div>
+            <div class="text-bone/70 mb-1">PRIVATE</div>
+            <div>Generated locally in Maine — not routed through external AI servers</div>
+          </div>
+          <div>
+            <div class="text-brass text-2xl mb-2">⚡</div>
+            <div class="text-bone/70 mb-1">INSTANT</div>
+            <div>Most readings arrive in under 60 seconds</div>
+          </div>
+          <div>
+            <div class="text-brass text-2xl mb-2">🃏</div>
+            <div class="text-bone/70 mb-1">ORIGINAL</div>
+            <div>Every reading is written fresh — no templates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== THE PERSON BEHIND IT =================== -->
+  <section class="py-24 lg:py-32 bg-shadow">
+    <div class="max-w-4xl mx-auto px-6 lg:px-10">
+
+      <div class="mb-12">
+        <div class="smallcaps text-[10px] text-brass mb-4">§ II — The Builder</div>
+        <h2 class="display text-4xl md:text-5xl text-bone mb-8">Built in Bangor.</h2>
+      </div>
+
+      <div class="grid md:grid-cols-12 gap-12 items-start">
+        <div class="md:col-span-7 font-body text-bone/80 text-lg leading-relaxed">
+          <p class="mb-6">
+            Maineiac Mysticbot was built by a developer based in Bangor, Maine — the same granite-coast city that inspired the Mystic persona. It started as a personal project: a way to make something that felt genuinely local and genuine in its voice, rather than another generic AI chatbot.
+          </p>
+          <p class="mb-6">
+            The model, the bot, the persona, the infrastructure — all of it runs on hardware in Maine. When you send your question, it goes to Bangor, gets answered by a model that's never touched a cloud GPU, and comes back.
+          </p>
+          <p>
+            This isn't a VC-backed platform. It's one person, a good machine, and the belief that a well-crafted AI reading is worth something.
+          </p>
+        </div>
+        <div class="md:col-span-5">
+          <div class="border border-brass/20 p-6 font-mono text-[11px] text-pewter tracking-wider space-y-3"
+               style="background: linear-gradient(180deg, var(--fog) 0%, var(--shadow) 100%);">
+            <div class="text-bone/70 mb-3">TRANSMISSION ORIGIN</div>
+            <div><span class="text-brass">LAT</span> 44.8016° N</div>
+            <div><span class="text-brass">LON</span> 68.7712° W</div>
+            <div><span class="text-brass">CITY</span> Bangor, Maine</div>
+            <div><span class="text-brass">INFRA</span> Local · Self-hosted</div>
+            <div><span class="text-brass">MODEL</span> On-premise LLM</div>
+            <div class="pt-3 border-t border-pewter/30">
+              Questions? Reach the bot at<br>
+              <a href="https://t.me/MAINEIACMYSTICBOT" class="text-brass hover:text-bone transition-colors">@MAINEIACMYSTICBOT</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== FAQ =================== -->
+  <section class="py-24 lg:py-32 bg-ink">
+    <div class="max-w-3xl mx-auto px-6 lg:px-10">
+
+      <div class="text-center mb-16">
+        <div class="smallcaps text-[10px] text-brass mb-4">§ III — Questions</div>
+        <h2 class="display text-4xl md:text-5xl text-bone">Frequently Asked</h2>
+        <div class="wave-rule mx-auto mt-6 max-w-[180px]"></div>
+      </div>
+
+      <div class="space-y-px">
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            Is this real psychic reading, or is it AI?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            It's AI — specifically a large-language model running locally in Maine, channeled through the Maineiac Mystic persona. The readings are not coming from a human psychic. What the bot offers is genuine in its voice and effort: every reading is generated fresh for your exact question, in the Mystic's tradition. Whether that's "real" is for you to decide.
+          </div>
+        </details>
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            How long does a reading take?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            Most readings arrive in under 60 seconds from the moment you submit your details. Birth chart readings sometimes take slightly longer — there's more to calculate. The bot will let you know it's working while it generates.
+          </div>
+        </details>
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            Is my information private?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            Yes. The bot runs on a self-hosted machine in Bangor, Maine — your details are not sent to OpenAI, Anthropic, or any other third-party AI provider. Readings are not stored after delivery. Payment is handled by Stripe, which has its own privacy policy. Your Telegram account details are handled by Telegram.
+          </div>
+        </details>
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            What payment methods are accepted?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            Card payments (Visa, Mastercard, Amex, etc.) via Stripe, or Telegram Stars — Telegram's built-in digital currency. Both options are presented in the bot when you select a reading.
+          </div>
+        </details>
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            What if I'm not satisfied with my reading?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            Message the bot directly at <a href="https://t.me/MAINEIACMYSTICBOT" class="ink-link text-brass">@MAINEIACMYSTICBOT</a> and explain what fell short. Refunds are handled case by case.
+          </div>
+        </details>
+
+        <details class="border border-pewter/30 group" style="background: var(--shadow);">
+          <summary class="flex items-center justify-between px-7 py-5 font-body text-lg text-bone cursor-pointer hover:text-brass transition-colors">
+            Do I need a Telegram account?
+            <span class="faq-arrow text-brass font-mono text-sm ml-4">▶</span>
+          </summary>
+          <div class="px-7 pb-6 font-body text-bone/70 text-base leading-relaxed border-t border-pewter/20 pt-5">
+            Yes — Telegram is the delivery channel. If you don't have one, creating an account is free and takes about two minutes at <a href="https://telegram.org" target="_blank" rel="noopener" class="ink-link text-brass">telegram.org</a>.
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== FINAL CTA =================== -->
+  <section class="py-28 lg:py-36 bg-shadow text-center">
+    <div class="max-w-xl mx-auto px-6">
+      <div class="double-rule w-20 mx-auto mb-10"></div>
+      <h2 class="display text-4xl md:text-5xl text-bone leading-[1.1] mb-6">
+        Ready to ask<br>
+        <em class="text-brass not-italic">the tides?</em>
+      </h2>
+      <a href="https://t.me/MAINEIACMYSTICBOT" target="_blank" rel="noopener"
+         class="inline-flex items-center gap-3 mt-6 bg-brass hover:bg-bone text-ink px-8 py-4 smallcaps text-[12px] transition-colors">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.49 8.83 19.4c.45 0 .65-.2.88-.43l2.12-2.03 4.4 3.22c.8.45 1.38.21 1.6-.74l2.9-13.6c.27-1.2-.43-1.66-1.21-1.37L1.7 9.4C.51 9.86.53 10.5 1.5 10.81l4.4 1.37 10.21-6.43c.48-.31.92-.14.56.21z"/></svg>
+        Open in Telegram
+      </a>
+      <div class="double-rule w-20 mx-auto mt-10"></div>
+    </div>
+  </section>
+
+  <!-- =================== FOOTER =================== -->
+  <footer class="bg-ink border-t border-pewter/30 py-14">
+    <div class="max-w-6xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-8 text-center md:text-left">
+      <div>
+        <div class="display text-xl text-bone mb-2">Maineiac Mysticbot</div>
+        <p class="font-body italic text-bone/60 text-sm">An almanac of small fates,<br>transmitted from the granite coast.</p>
+      </div>
+      <div class="font-mono text-[11px] text-pewter tracking-wider space-y-1.5">
+        <div class="text-bone/70 mb-2">COORDINATES</div>
+        <div>44.8016° N, 68.7712° W</div>
+        <div>Bangor, Maine, U.S.A.</div>
+      </div>
+      <div class="font-mono text-[11px] text-pewter tracking-wider space-y-1.5">
+        <div class="text-bone/70 mb-2">COLOPHON</div>
+        <div>© 2026 Maineiac Mysticbot</div>
+        <div>Set in Cormorant Garamond &amp; JetBrains Mono.</div>
+        <div>Built by hand, fed by tides.</div>
+        <div class="pt-2"><a href="index.html" class="ink-link hover:text-brass transition-colors">← Back to home</a></div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
