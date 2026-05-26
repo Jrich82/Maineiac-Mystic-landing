@@ -3,8 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Maineiac Mysticbot — Tarot, Psychic, Moon & Birth Chart readings, transmitted from the granite coast of Maine via Telegram.">
+  <meta name="description" content="Maineiac Mysticbot — Tarot, Psychic, Birth Chart, Numerology, Dream & Moon-Phase readings — transmitted from the granite coast of Maine via Telegram.">
   <title>Maineiac Mysticbot · An Almanac of Small Fates</title>
+
+  <!-- Social previews. If the production URL is not maineiacmystic.com, swap it everywhere below. -->
+  <link rel="canonical" href="https://maineiacmystic.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Maineiac Mysticbot">
+  <meta property="og:url" content="https://maineiacmystic.com/">
+  <meta property="og:title" content="Maineiac Mysticbot · An Almanac of Small Fates">
+  <meta property="og:description" content="Tarot, Psychic, Birth Chart, Numerology, Dream & Moon-Phase readings — transmitted from the granite coast of Maine via Telegram.">
+  <meta property="og:image" content="https://maineiacmystic.com/hero.jpg">
+  <meta property="og:image:alt" content="Maineiac Mysticbot — an almanac of small fates from the granite coast of Maine.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Maineiac Mysticbot · An Almanac of Small Fates">
+  <meta name="twitter:description" content="Tarot, Psychic, Birth Chart, Numerology, Dream & Moon-Phase readings — transmitted from the granite coast of Maine via Telegram.">
+  <meta name="twitter:image" content="https://maineiacmystic.com/hero.jpg">
+  <meta name="theme-color" content="#0a0e14">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -269,7 +284,8 @@
                 </radialGradient>
                 <mask id="phaseMask" maskUnits="userSpaceOnUse">
                   <rect width="380" height="380" fill="white"/>
-                  <ellipse id="phase-shadow" cx="190" cy="190" rx="80" ry="125" fill="black"/>
+                  <!-- The shadow path is computed from today's moon phase by the script below. -->
+                  <path id="phase-shadow" d="M 190 65 A 125 125 0 0 0 190 315 A 125 125 0 0 1 190 65 Z" fill="black"/>
                 </mask>
               </defs>
               <circle cx="190" cy="190" r="125" fill="url(#moonGrad)" mask="url(#phaseMask)" opacity="0.95"/>
@@ -617,6 +633,29 @@
     document.getElementById('moon-phase-illumination').textContent = illum + '% illuminated';
     document.getElementById('moon-strip').textContent = shortName.toUpperCase() + ' · ' + illum + '%';
     document.getElementById('moon-short').textContent  = longName + ' (' + illum + '%)';
+
+    // Draw the moon-disk shadow to match the live phase.
+    // The terminator on a face-on lunar disk is a half-ellipse whose horizontal
+    // radius is R*|cos(2π·p)|. The shadow path traces a half-circle of the moon
+    // (left half when waxing, right half when waning) plus the terminator arc.
+    (function drawPhaseShadow() {
+      const moonCx = 190, moonCy = 190, R = 125;
+      const rxTerm = R * Math.abs(Math.cos(2 * Math.PI * p));
+      let outerSweep, innerSweep;
+      if (p < 0.5) {
+        // Waxing — shadow covers the left side.
+        outerSweep = 0;                       // outer arc = left semicircle (CCW top→bottom)
+        innerSweep = p < 0.25 ? 1 : 0;        // crescent: terminator bulges right; gibbous: bulges left
+      } else {
+        // Waning — shadow covers the right side.
+        outerSweep = 1;                       // outer arc = right semicircle (CW top→bottom)
+        innerSweep = p < 0.75 ? 1 : 0;        // gibbous: terminator bulges right; crescent: bulges left
+      }
+      const d = `M ${moonCx} ${moonCy - R} ` +
+                `A ${R} ${R} 0 0 ${outerSweep} ${moonCx} ${moonCy + R} ` +
+                `A ${rxTerm} ${R} 0 0 ${innerSweep} ${moonCx} ${moonCy - R} Z`;
+      document.getElementById('phase-shadow').setAttribute('d', d);
+    })();
 
     /* ---------- Date strip ---------- */
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
